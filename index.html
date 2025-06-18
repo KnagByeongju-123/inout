@@ -19,7 +19,7 @@
           'video',
           (result, err) => {
             if (result) {
-              alert("스캔 성공: " + result.getText());
+              alert("✅ 스캔 성공: " + result.getText());
               stopZXingScan();
             }
           },
@@ -29,14 +29,15 @@
               width: { ideal: 1280 },
               height: { ideal: 720 },
               advanced: [
-                { focusMode: "continuous" } // 자동초점 요청
+                { zoom: 2.5 },               // 광각 보정용 줌 적용
+                { focusMode: "continuous" }  // 자동초점 유지
               ]
             }
           }
         );
       } catch (err) {
         console.error(err);
-        alert("카메라 접근 실패");
+        alert("❌ 카메라 접근 실패: " + err.message);
         stopZXingScan();
       }
     }
@@ -154,7 +155,7 @@
 <body>
   <div class="card">
     <h1 style="font-size: 32px;">📦 바코드 스캔</h1>
-    <button class="scan-btn" onclick="startZXingScan()">📷 스캔 시작</button>
+    <button class="scan-btn" onclick="startZXingScan()">📷 스캔 시작1</button>
   </div>
 
   <div id="scannerModal" class="scanner-container">
