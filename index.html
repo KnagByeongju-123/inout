@@ -1,171 +1,35 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>ZXing 바코드 스캐너</title>
-  <script type="module">
-    import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.0.10/+esm';
+  <title>모바일 바코드 입력</title>
+</head>
+<body>
+  <h3>바코드 입력3</h3>
+  <input type="text" id="barcodeInput" placeholder="바코드를 스캔하세요" style="width: 100%; font-size: 20px;" />
 
-    let codeReader = new BrowserMultiFormatReader();
-    let controls;
+  <script>
+    let lastClipboard = "";
 
-    async function startZXingScan() {
-      document.getElementById('scannerModal').style.display = 'flex';
-
+    async function checkClipboard() {
       try {
-        controls = await codeReader.decodeFromVideoDevice(
-          null,
-          'video',
-          (result, err) => {
-            if (result) {
-              alert("✅ 스캔 성공: " + result.getText());
-              stopZXingScan();
-            }
-          },
-          {
-            video: {
-              facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-              advanced: [
-                { zoom: 2.5 },               // 광각 보정용 줌 적용
-                { focusMode: "continuous" }  // 자동초점 유지
-              ]
-            }
-          }
-        );
+        const text = await navigator.clipboard.readText();
+        const input = document.getElementById("barcodeInput");
+        
+        // 클립보드에 새 값이 있을 때만 입력
+        if (text && text !== lastClipboard) {
+          lastClipboard = text;
+          input.value = text;
+          input.focus(); // 입력창에 포커스
+        }
       } catch (err) {
-        console.error(err);
-        alert("❌ 카메라 접근 실패: " + err.message);
-        stopZXingScan();
+        console.warn("클립보드 접근 실패:", err);
       }
     }
 
-    function stopZXingScan() {
-      if (controls) controls.stop();
-      document.getElementById('scannerModal').style.display = 'none';
-    }
-
-    window.startZXingScan = startZXingScan;
-    window.stopZXingScan = stopZXingScan;
+    // 페이지 상호작용 후 감시 시작
+    document.body.addEventListener("click", () => {
+      setInterval(checkClipboard, 1000); // 1초마다 확인
+    }, { once: true }); // 한 번만 실행
   </script>
-
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-      background: #f0f0f0;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 40px 20px;
-      margin: 40px auto;
-      width: 90%;
-      max-width: 500px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .scan-btn {
-      font-size: 24px;
-      padding: 20px;
-      border-radius: 12px;
-      width: 100%;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .scanner-container {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.95);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-
-    video {
-      width: 100vw;
-      height: 60vh;
-      background: black;
-      position: relative;
-    }
-
-    .crosshair {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 60px;
-      height: 60px;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    .crosshair::before,
-    .crosshair::after {
-      content: '';
-      position: absolute;
-      background: red;
-    }
-
-    .crosshair::before {
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      transform: translateY(-50%);
-    }
-
-    .crosshair::after {
-      top: 0;
-      left: 50%;
-      width: 2px;
-      height: 100%;
-      transform: translateX(-50%);
-    }
-
-    .scanner-controls {
-      margin-top: 20px;
-    }
-
-    .btn {
-      font-size: 18px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      background: #ff6b6b;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1 style="font-size: 32px;">📦 바코드 스캔2</h1>
-    <button class="scan-btn" onclick="startZXingScan()">📷 스캔 시작</button>
-  </div>
-
-  <div id="scannerModal" class="scanner-container">
-    <div style="position: relative;">
-      <video id="video" muted autoplay playsinline></video>
-      <div class="crosshair"></div>
-    </div>
-    <div class="scanner-controls">
-      <button class="btn" onclick="stopZXingScan()">❌ 닫기</button>
-    </div>
-  </div>
 </body>
 </html>
