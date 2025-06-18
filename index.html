@@ -196,35 +196,38 @@
     currentTarget = targetId;
     document.getElementById('scannerModal').style.display = 'flex';
 
-    Quagga.init({
-      inputStream: {
-        type: "LiveStream",
-        constraints: {
-          facingMode: "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 192 }
-        },
-        area: {
-          top: "40%",
-          right: "5%",
-          bottom: "60%",
-          left: "5%"
-        },
-        target: document.querySelector('#scanner')
-      },
-      decoder: {
-        readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
-      },
-      locate: true
-    }, function(err) {
-      if (err) {
-        console.error(err);
-        alert("카메라 초기화 오류");
-        stopScan();
-        return;
-      }
-      Quagga.start();
-    });
+  Quagga.init({
+  inputStream: {
+    type: "LiveStream",
+    constraints: {
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      facingMode: "environment",
+      advanced: [
+        { zoom: 1.0 }, // 일부 기기에서만 적용
+        { focusMode: "continuous" } // 자동 초점 계속 유지
+      ]
+    },
+    target: document.querySelector('#scanner')
+  },
+  decoder: {
+    readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
+  },
+  locator: {
+    patchSize: "medium", // 빠른 감지 + 정확도 균형
+    halfSample: true
+  },
+  locate: true,
+  numOfWorkers: 2 // CPU 코어 제한
+}, function (err) {
+  if (err) {
+    console.error(err);
+    alert("카메라 초기화 오류");
+    stopScan();
+    return;
+  }
+  Quagga.start();
+});
 
     Quagga.onDetected(function(result) {
       const code = result.codeResult.code;
