@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>바코드 품번 & 수량 입력</title>
+  <title>바코드 자동 입력 시스템</title>
   <style>
     input {
       font-size: 16px;
@@ -16,19 +16,19 @@
   </style>
 </head>
 <body>
-  <h2>바코드 입력 (품번 & 수량)</h2>
+  <h2>품번 & 수량 자동 입력2</h2>
 
   <form id="barcodeForm">
-    <!-- 10줄 반복 생성 -->
-    <div id="inputRows">
-      <!-- JavaScript에서 생성됩니다 -->
-    </div>
+    <div id="inputRows"></div>
   </form>
 
   <script>
     const rowCount = 10;
     const inputRows = document.getElementById("inputRows");
+    let lastClipboard = "";
+    let autoInputEnabled = false;
 
+    // 입력칸 생성
     for (let i = 0; i < rowCount; i++) {
       const row = document.createElement("div");
       row.className = "row";
@@ -38,40 +38,56 @@
       codeInput.placeholder = `품번 ${i + 1}`;
       codeInput.id = `code-${i}`;
       codeInput.dataset.row = i;
-      codeInput.classList.add("code");
+      codeInput.dataset.type = "code";
 
       const qtyInput = document.createElement("input");
       qtyInput.type = "text";
       qtyInput.placeholder = `수량 ${i + 1}`;
       qtyInput.id = `qty-${i}`;
       qtyInput.dataset.row = i;
-      qtyInput.classList.add("qty");
+      qtyInput.dataset.type = "qty";
 
       row.appendChild(codeInput);
       row.appendChild(qtyInput);
       inputRows.appendChild(row);
     }
 
-    // 포커스 흐름 제어
-    document.querySelectorAll(".code").forEach(codeInput => {
-      codeInput.addEventListener("change", (e) => {
-        const row = parseInt(e.target.dataset.row);
-        const qtyInput = document.getElementById(`qty-${row}`);
-        qtyInput.focus();
-      });
-    });
+    // 클립보드 자동 감지 후 입력
+    async function checkClipboard() {
+      try {
+        if (!autoInputEnabled) return;
 
-    document.querySelectorAll(".qty").forEach(qtyInput => {
-      qtyInput.addEventListener("change", (e) => {
-        const row = parseInt(e.target.dataset.row);
-        const nextCodeInput = document.getElementById(`code-${row + 1}`);
-        if (nextCodeInput) {
-          nextCodeInput.focus();
+        const text = await navigator.clipboard.readText();
+        if (text && text !== lastClipboard) {
+          lastClipboard = text;
+
+          const active = document.activeElement;
+          if (active.tagName === "INPUT") {
+            active.value = text;
+
+            const row = parseInt(active.dataset.row);
+            const type = active.dataset.type;
+
+            if (type === "code") {
+              document.getElementById(`qty-${row}`).focus();
+            } else if (type === "qty") {
+              const nextCode = document.getElementById(`code-${row + 1}`);
+              if (nextCode) nextCode.focus();
+            }
+          }
         }
-      });
-    });
+      } catch (err) {
+        console.warn("클립보드 접근 실패:", err);
+      }
+    }
 
-    // 첫 입력칸 자동 포커스
+    // 유저 클릭 후 자동 감지 활성화
+    document.body.addEventListener("click", () => {
+      autoInputEnabled = true;
+      setInterval(checkClipboard, 500); // 0.5초 간격
+    }, { once: true });
+
+    // 시작 시 첫 번째 입력칸 포커스
     document.getElementById("code-0").focus();
   </script>
 </body>
