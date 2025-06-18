@@ -10,339 +10,139 @@
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      font-size: 36px;
+      background: #111;
       height: 100%;
-      overflow: auto;
+      overflow: hidden;
     }
-    .container {
-      padding: 10px 5px 20px 5px;
-      box-sizing: border-box;
-    }
-    .form-card {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      margin: 0 auto;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 30px;
-      font-size: 53px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .input-card {
-      background: white;
-      border-radius: 16px;
-      padding: 29px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      border: 1px solid rgba(102, 126, 234, 0.1);
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 19px;
-    }
-    .card-icon {
-      font-size: 48px;
-      margin-right: 16px;
-      color: #667eea;
-    }
-    .card-label {
-      font-size: 36px;
-      font-weight: 600;
-      color: #333;
-      flex: 1;
-    }
-    .scan-btn, .manual-btn {
-      font-size: 28px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      margin-left: 6px;
-      background: #4caf50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .manual-btn {
-      background: #2196f3;
-    }
+
     .scanner-container {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
+      display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      position: relative;
     }
+
     #scanner {
       width: 100vw;
-      height: 10vh;
+      height: 60vh;
       background: black;
+      position: relative;
     }
+
+    .crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60px;
+      height: 60px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: '';
+      position: absolute;
+      background: red;
+    }
+
+    .crosshair::before {
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      transform: translateY(-50%);
+    }
+
+    .crosshair::after {
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 100%;
+      transform: translateX(-50%);
+    }
+
     .scanner-controls {
       margin-top: 20px;
-      display: flex;
-      gap: 20px;
     }
+
     .btn {
+      font-size: 24px;
+      padding: 12px 24px;
+      border-radius: 10px;
       background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
       border: none;
-      border-radius: 16px;
-      font-size: 36px;
-      padding: 20px;
       cursor: pointer;
-      font-weight: 600;
-    }
-    .close-btn {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-    }
-    .card-input {
-      width: 100%;
-      padding: 20px;
-      font-size: 32px;
-      box-sizing: border-box;
-      border-radius: 12px;
-      border: 2px solid rgba(102, 126, 234, 0.2);
-      background: rgba(102, 126, 234, 0.05);
-    }
-    @media (max-width: 480px) {
-      .card-input, .btn, .scan-btn, .manual-btn {
-        font-size: 24px !important;
-        padding: 12px !important;
-      }
-      #scanner {
-        width: 100vw;
-        height: 12vh;
-      }
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <div class="form-card">
-    <h1>📱 바코드 스캐너</h1>
-    <form id="inventoryForm">
-      <div class="input-card">
-        <div class="card-header">
-          <span class="card-icon">🏷️</span>
-          <span class="card-label">품번</span>
-          <button class="scan-btn" type="button" onclick="startScan('itemCode')">스캔</button>
-          <button class="manual-btn" type="button" onclick="enableManual('itemCode')">수동입력</button>
-        </div>
-        <input type="text" id="itemCode" class="card-input" placeholder="바코드로 입력 (필수)" readonly onclick="startScan('itemCode')">
-      </div>
-      <div class="input-card">
-        <div class="card-header">
-          <span class="card-icon">📦</span>
-          <span class="card-label">수량</span>
-          <button class="scan-btn" type="button" onclick="startScan('quantity')">스캔</button>
-          <button class="manual-btn" type="button" onclick="enableManual('quantity')">수동입력</button>
-        </div>
-        <input type="number" id="quantity" class="card-input" placeholder="바코드 또는 직접입력 가능" readonly onclick="startScan('quantity')">
-      </div>
-      <div class="input-card">
-        <div class="card-header">
-          <span class="card-icon">📝</span>
-          <span class="card-label">비고</span>
-        </div>
-        <input type="text" id="memo" class="card-input" placeholder="비고를 입력하세요">
-      </div>
-      <div class="button-group">
-        <button type="submit" class="btn">✅ 임시 저장</button>
-        <button type="button" class="btn" onclick="submitToGoogleSheet()">📤 일괄 업로드</button>
-        <button type="button" class="btn close-btn" onclick="window.close()">❌ 닫기</button>
-      </div>
-    </form>
-    <div class="input-card">
-      <div class="card-header">
-        <span class="card-icon">📋</span>
-        <span class="card-label">임시 저장 목록</span>
-      </div>
-      <textarea id="savedDataBox" class="card-input" style="height: 300px; font-size: 30px; resize: vertical; min-height: 150px;"></textarea>
-    </div>
-    <div class="error-message" id="errorMessage"></div>
-    <div class="success-message" id="successMessage"></div>
+<div class="scanner-container">
+  <div id="scanner">
+    <div class="crosshair"></div>
   </div>
-</div>
-<div id="scannerModal" class="scanner-container">
-  <div id="scanner"></div>
   <div class="scanner-controls">
     <button class="btn" onclick="stopScan()">❌ 닫기</button>
   </div>
 </div>
-<script>
-  let currentTarget = null;
-  const pendingDataList = [];
 
-  function startScan(targetId) {
-    currentTarget = targetId;
-    document.getElementById('scannerModal').style.display = 'flex';
+<script>
+  let lastCode = null;
 
   Quagga.init({
-  inputStream: {
-    type: "LiveStream",
-    constraints: {
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      facingMode: "environment",
-      advanced: [
-        { zoom: 1.0 }, // 일부 기기에서만 적용
-        { focusMode: "continuous" } // 자동 초점 계속 유지
-      ]
+    inputStream: {
+      type: "LiveStream",
+      constraints: {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        facingMode: "environment",
+        advanced: [
+          { zoom: 1.0 },
+          { focusMode: "continuous" }
+        ]
+      },
+      area: {
+        top: "20%",    // 상단 20% 여백
+        right: "10%",
+        bottom: "20%",
+        left: "10%"    // 하단/좌우 여백 → 중앙 60% 영역
+      },
+      target: document.querySelector('#scanner')
     },
-    target: document.querySelector('#scanner')
-  },
-  decoder: {
-    readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
-  },
-  locator: {
-    patchSize: "medium", // 빠른 감지 + 정확도 균형
-    halfSample: true
-  },
-  locate: true,
-  numOfWorkers: 2 // CPU 코어 제한
-}, function (err) {
-  if (err) {
-    console.error(err);
-    alert("카메라 초기화 오류");
-    stopScan();
-    return;
-  }
-  Quagga.start();
-});
+    decoder: {
+      readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
+    },
+    locate: true,
+    numOfWorkers: 2
+  }, function (err) {
+    if (err) {
+      console.error(err);
+      alert("카메라 초기화 오류");
+      return;
+    }
+    Quagga.start();
+  });
 
-    Quagga.onDetected(function(result) {
-      const code = result.codeResult.code;
-      if (currentTarget === 'quantity') {
-        const value = parseInt(code);
-        if (!isNaN(value)) {
-          document.getElementById(currentTarget).value = value;
-        }
-      } else {
-        document.getElementById(currentTarget).value = code;
-      }
+  Quagga.onDetected(function(result) {
+    const code = result.codeResult.code;
+    if (code && code !== lastCode) {
+      lastCode = code;
+      alert("스캔 성공: " + code);
+      // 원하는 작업 수행 후 자동 종료
       stopScan();
-    });
-  }
+    }
+  });
 
   function stopScan() {
     Quagga.stop();
     Quagga.offDetected();
-    document.getElementById('scannerModal').style.display = 'none';
-    currentTarget = null;
-  }
-
-  function enableManual(targetId) {
-    const input = document.getElementById(targetId);
-    input.readOnly = false;
-    input.focus();
-  }
-
-  document.getElementById('inventoryForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const data = {
-      date: new Date().toISOString().split('T')[0],
-      itemCode: document.getElementById('itemCode').value,
-      outbound: '',
-      inbound: '',
-      quantity: document.getElementById('quantity').value,
-      memo: document.getElementById('memo').value
-    };
-
-    if (!data.itemCode || !data.quantity) {
-      showError('품번과 수량은 필수 입력 항목입니다.');
-      return;
-    }
-
-    pendingDataList.push(data);
-    updateSavedDataBox();
-    showSuccess('임시 저장 완료');
-    document.getElementById('itemCode').value = '';
-    document.getElementById('quantity').value = '';
-    document.getElementById('memo').value = '';
-  });
-
-  function updateSavedDataBox() {
-    const box = document.getElementById('savedDataBox');
-    box.value = pendingDataList.map((d, i) =>
-      `${i + 1}. [${d.date}] ${d.itemCode} / ${d.quantity}개 / ${d.outbound} -> ${d.inbound} / ${d.memo || ''}`
-    ).join('\n');
-  }
-
-  function submitToGoogleSheet() {
-    const box = document.getElementById('savedDataBox');
-    const lines = box.value.trim().split('\n');
-    const updatedList = lines.map(line => {
-      const match = line.match(/\[(.*?)\]\s+(.*?)\s+\/\s+(\d+)개\s+\/\s+(.*?)\s+->\s+(.*?)\s+\/\s+(.*)/);
-      if (match) {
-        return {
-          date: match[1],
-          itemCode: match[2],
-          quantity: match[3],
-          outbound: match[4],
-          inbound: match[5],
-          memo: match[6]
-        };
-      }
-      return null;
-    }).filter(Boolean);
-
-    if (updatedList.length === 0) {
-      showError('업로드할 데이터가 없습니다.');
-      return;
-    }
-
-    fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
-      method: 'POST',
-      body: JSON.stringify(updatedList),
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          showSuccess('구글시트로 업로드 완료');
-          pendingDataList.length = 0;
-          updateSavedDataBox();
-        } else {
-          showError('업로드 실패: ' + result.message);
-        }
-      })
-      .catch(err => {
-        showError('에러 발생: ' + err.toString());
-      });
-  }
-
-  function showError(message) {
-    const err = document.getElementById('errorMessage');
-    err.textContent = message;
-    err.style.display = 'block';
-    setTimeout(() => err.style.display = 'none', 4000);
-  }
-
-  function showSuccess(message) {
-    const msg = document.getElementById('successMessage');
-    msg.textContent = message;
-    msg.style.display = 'block';
-    setTimeout(() => msg.style.display = 'none', 3000);
+    document.querySelector('.scanner-container').style.display = 'none';
   }
 </script>
 </body>
