@@ -92,8 +92,8 @@
       flex-direction: column;
     }
     #scanner {
-      width: 90vw;
-      height: 60vh;
+      width: 100vw;
+      height: 10vh;
       background: black;
     }
     .scanner-controls {
@@ -129,8 +129,8 @@
         padding: 12px !important;
       }
       #scanner {
-        width: 95vw;
-        height: 50vh;
+        width: 100vw;
+        height: 12vh;
       }
     }
   </style>
@@ -202,7 +202,13 @@
         constraints: {
           facingMode: "environment",
           width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          height: { ideal: 192 }
+        },
+        area: {
+          top: "40%",
+          right: "5%",
+          bottom: "60%",
+          left: "5%"
         },
         target: document.querySelector('#scanner')
       },
@@ -253,8 +259,8 @@
     const data = {
       date: new Date().toISOString().split('T')[0],
       itemCode: document.getElementById('itemCode').value,
-      outbound: document.getElementById('outbound')?.value || '',
-      inbound: document.getElementById('inbound')?.value || '',
+      outbound: '',
+      inbound: '',
       quantity: document.getElementById('quantity').value,
       memo: document.getElementById('memo').value
     };
@@ -274,7 +280,9 @@
 
   function updateSavedDataBox() {
     const box = document.getElementById('savedDataBox');
-    box.value = pendingDataList.map((d, i) => `${i + 1}. [${d.date}] ${d.itemCode} / ${d.quantity}개 / ${d.outbound} -> ${d.inbound} / ${d.memo || ''}`).join('\n');
+    box.value = pendingDataList.map((d, i) =>
+      `${i + 1}. [${d.date}] ${d.itemCode} / ${d.quantity}개 / ${d.outbound} -> ${d.inbound} / ${d.memo || ''}`
+    ).join('\n');
   }
 
   function submitToGoogleSheet() {
