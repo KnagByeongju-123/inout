@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>바코드 자동 입력 시스템</title>
+  <title>모바일 바코드 입력 시스템</title>
   <style>
     input {
       font-size: 16px;
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h2>품번 & 수량 자동 입력2</h2>
+  <h2>품번 & 수량 자동입력</h2>
 
   <form id="barcodeForm">
     <div id="inputRows"></div>
@@ -28,7 +28,7 @@
     let lastClipboard = "";
     let autoInputEnabled = false;
 
-    // 입력칸 생성
+    // 입력칸 10줄 생성
     for (let i = 0; i < rowCount; i++) {
       const row = document.createElement("div");
       row.className = "row";
@@ -52,28 +52,35 @@
       inputRows.appendChild(row);
     }
 
-    // 클립보드 자동 감지 후 입력
+    // 진동 함수 (지원되는 경우)
+    function vibrate(ms = 100) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    // 클립보드 감시 함수
     async function checkClipboard() {
       try {
         if (!autoInputEnabled) return;
 
         const text = await navigator.clipboard.readText();
-        if (text && text !== lastClipboard) {
+        if (!text || text === lastClipboard) return;
+
+        const active = document.activeElement;
+        if (active.tagName === "INPUT") {
+          active.value = text;
+          vibrate(100); // 진동
+
+          const row = parseInt(active.dataset.row);
+          const type = active.dataset.type;
+
           lastClipboard = text;
 
-          const active = document.activeElement;
-          if (active.tagName === "INPUT") {
-            active.value = text;
-
-            const row = parseInt(active.dataset.row);
-            const type = active.dataset.type;
-
-            if (type === "code") {
-              document.getElementById(`qty-${row}`).focus();
-            } else if (type === "qty") {
-              const nextCode = document.getElementById(`code-${row + 1}`);
-              if (nextCode) nextCode.focus();
-            }
+          // 다음 입력칸으로 이동
+          if (type === "code") {
+            document.getElementById(`qty-${row}`).focus();
+          } else if (type === "qty") {
+            const nextCode = document.getElementById(`code-${row + 1}`);
+            if (nextCode) nextCode.focus();
           }
         }
       } catch (err) {
@@ -81,13 +88,13 @@
       }
     }
 
-    // 유저 클릭 후 자동 감지 활성화
+    // 유저 클릭 후 감시 시작 (보안 제한)
     document.body.addEventListener("click", () => {
       autoInputEnabled = true;
-      setInterval(checkClipboard, 500); // 0.5초 간격
+      setInterval(checkClipboard, 1000); // 1초마다 체크
     }, { once: true });
 
-    // 시작 시 첫 번째 입력칸 포커스
+    // 첫 포커스
     document.getElementById("code-0").focus();
   </script>
 </body>
