@@ -1,35 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>모바일 바코드 입력</title>
+  <meta charset="UTF-8">
+  <title>바코드 품번 & 수량 입력</title>
+  <style>
+    input {
+      font-size: 16px;
+      padding: 5px;
+      width: 150px;
+      margin-right: 10px;
+    }
+    .row {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h3>바코드 입력3</h3>
-  <input type="text" id="barcodeInput" placeholder="바코드를 스캔하세요" style="width: 100%; font-size: 20px;" />
+  <h2>바코드 입력 (품번 & 수량)</h2>
+
+  <form id="barcodeForm">
+    <!-- 10줄 반복 생성 -->
+    <div id="inputRows">
+      <!-- JavaScript에서 생성됩니다 -->
+    </div>
+  </form>
 
   <script>
-    let lastClipboard = "";
+    const rowCount = 10;
+    const inputRows = document.getElementById("inputRows");
 
-    async function checkClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        const input = document.getElementById("barcodeInput");
-        
-        // 클립보드에 새 값이 있을 때만 입력
-        if (text && text !== lastClipboard) {
-          lastClipboard = text;
-          input.value = text;
-          input.focus(); // 입력창에 포커스
-        }
-      } catch (err) {
-        console.warn("클립보드 접근 실패:", err);
-      }
+    for (let i = 0; i < rowCount; i++) {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const codeInput = document.createElement("input");
+      codeInput.type = "text";
+      codeInput.placeholder = `품번 ${i + 1}`;
+      codeInput.id = `code-${i}`;
+      codeInput.dataset.row = i;
+      codeInput.classList.add("code");
+
+      const qtyInput = document.createElement("input");
+      qtyInput.type = "text";
+      qtyInput.placeholder = `수량 ${i + 1}`;
+      qtyInput.id = `qty-${i}`;
+      qtyInput.dataset.row = i;
+      qtyInput.classList.add("qty");
+
+      row.appendChild(codeInput);
+      row.appendChild(qtyInput);
+      inputRows.appendChild(row);
     }
 
-    // 페이지 상호작용 후 감시 시작
-    document.body.addEventListener("click", () => {
-      setInterval(checkClipboard, 1000); // 1초마다 확인
-    }, { once: true }); // 한 번만 실행
+    // 포커스 흐름 제어
+    document.querySelectorAll(".code").forEach(codeInput => {
+      codeInput.addEventListener("change", (e) => {
+        const row = parseInt(e.target.dataset.row);
+        const qtyInput = document.getElementById(`qty-${row}`);
+        qtyInput.focus();
+      });
+    });
+
+    document.querySelectorAll(".qty").forEach(qtyInput => {
+      qtyInput.addEventListener("change", (e) => {
+        const row = parseInt(e.target.dataset.row);
+        const nextCodeInput = document.getElementById(`code-${row + 1}`);
+        if (nextCodeInput) {
+          nextCodeInput.focus();
+        }
+      });
+    });
+
+    // 첫 입력칸 자동 포커스
+    document.getElementById("code-0").focus();
   </script>
 </body>
 </html>
